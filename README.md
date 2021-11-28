@@ -1,8 +1,10 @@
-[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
-[![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
+# Tic Tac Toe Kotlin MPP
+This repository was created for my JetBrains Internship application.
 
-# Full Stack JVM & JS App Hands-On Lab
+This is a MVP implementation. I sadly did not much time to invest into this so the 
+"AI" isn't exactly the smartest. But it works. That's the most important part.
 
-This repository is the code corresponding to the hands-on lab [Building a Full Stack Web App with Kotlin Multiplatform](https://play.kotlinlang.org/hands-on/Full%20Stack%20Web%20App%20with%20Kotlin%20Multiplatform/).
+Before creating this i've never used Kotlin before. Same holds for the entire framework (Kotr, mpp etc..)
 
-**The master branch is to be used as a template. If you would like to see the completed project, check out the [final](https://github.com/kotlin-hands-on/jvm-js-fullstack/tree/final) branch.**
+I only had 1 day to work on this and the documentation is somewhat lacking. But I think
+it turned out fine considering all these constraints. 

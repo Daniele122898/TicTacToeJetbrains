@@ -1,6 +1,10 @@
 import kotlin.math.max
 import kotlin.math.min
 
+fun IsGridFull(grid: ArrayList<ArrayList<GridItem>>): Boolean {
+    return grid.flatten().none { item -> item.content == GridType.Empty }
+}
+
 fun AIMakeMove(grid: ArrayList<ArrayList<GridItem>>, playerMove: Move): Move? {
     val empty = ArrayList<GridItem>()
     grid.forEach { row ->

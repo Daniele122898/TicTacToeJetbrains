@@ -138,15 +138,18 @@ fun main() {
                         return@post
                     }
                     val aiMove = AIMakeMove(game.grid, move)
+                    // Ai couldnt make move so its definitely a draw since we didnt win above
                     if (aiMove == null) {
                         // Draw
                         game.state = GameState.Draw
                         call.respond(HttpStatusCode.OK)
                         return@post
                     }
-                    // AI won
+                    // First check if AI won before we check for a full grid again! otherwise we might give a draw if the last move was a winning move
                     if (CheckIfWinningMove(game.grid, game.grid[aiMove.row][aiMove.col]))
                         game.state = GameState.AIWon
+                    else if (IsGridFull(game.grid))
+                        game.state = GameState.Draw
                     else
                         game.playerTurn = true
 

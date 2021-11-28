@@ -3,6 +3,7 @@ import react.dom.*
 import kotlinx.html.js.*
 import kotlinx.coroutines.*
 import kotlinx.html.classes
+import react.dom.server.renderToStaticMarkup
 
 private val scope = MainScope()
 
@@ -65,12 +66,14 @@ val tictactoe = fc<Props> {
                     } else if (item.content == GridType.Circle) {
                         attrs.classes = attrs.classes.plus("ai")
                     }
-                    attrs.onClickFunction = {
-                        scope.launch {
-                            postGameMove(game.uuid, Move(item.row, item.col, GridType.Cross))
-                            // TODO separate into GameId and Grid because recreating this object everytime is not necessary
-                            // Small move updates would also be great or a history but this is easier for now
-                            setGame(getGame(game.uuid))
+                    attrs.onClickFunction =  {
+                        if (item.content == GridType.Empty) {
+                            scope.launch {
+                                postGameMove(game.uuid, Move(item.row, item.col, GridType.Cross))
+                                // TODO separate into GameId and Grid because recreating this object everytime is not necessary
+                                // Small move updates would also be great or a history but this is easier for now
+                                setGame(getGame(game.uuid))
+                            }
                         }
                     }
                     span {

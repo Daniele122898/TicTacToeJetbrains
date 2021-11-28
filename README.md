@@ -23,7 +23,6 @@ pollute the demo code and take a while. Thus, I've decided to not add it. (It wo
 - Proper multiplayer. Technically this allows for multiple games to be run. So concurrent multiplayer shouldnt be hard to add
 - Websocket implementation. This also means we can send incremental changes instead of the entire board
 - Actual responsive design
-- Score keeping
 
 ## Screenshots
 ![image](https://user-images.githubusercontent.com/20451770/143784564-9ef7f656-d49b-479f-989b-4138891a0051.png)

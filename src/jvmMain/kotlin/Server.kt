@@ -23,12 +23,13 @@ const val deleteOffsetMillis = 10*60*1000 // 10 minutes
 
 fun gameCleanup() {
     val threshold = System.currentTimeMillis() - deleteOffsetMillis
-    val entries = access.entries
-    for (e in entries) {
+    val iter = access.entries.iterator()
+    while (iter.hasNext()) {
+        val e = iter.next()
         if (e.value >= threshold)
             continue
 
-        games.remove(e.key)
+        iter.remove()
         access.remove(e.key)
     }
 }

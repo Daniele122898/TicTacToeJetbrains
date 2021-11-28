@@ -9,16 +9,39 @@ import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.concurrent.schedule
 
-val collection = ArrayList<ShoppingListItem>()
 val games = HashMap<String, Game>()
+val access = HashMap<String, Long>()
 
 const val gridDimension = 10;
 const val winningScore = 5;
+const val deleteOffsetMillis = 10*60*1000 // 10 minutes
+
+fun gameCleanup() {
+    val threshold = System.currentTimeMillis() - deleteOffsetMillis
+    val entries = access.entries
+    for (e in entries) {
+        if (e.value >= threshold)
+            continue
+
+        games.remove(e.key)
+        access.remove(e.key)
+    }
+}
 
 fun main() {
+    // Schedule game cleanup
+    val timer = Timer("Games cleanup", true)
+    timer.schedule(
+        TimeUnit.MINUTES.toMillis(5),
+        TimeUnit.MINUTES.toMillis(5)) {
+        gameCleanup()
+    }
+
     val port = System.getenv("PORT")?.toInt() ?: 8080
     embeddedServer(Netty, port) {
         install(ContentNegotiation) {
@@ -58,6 +81,7 @@ fun main() {
                     }
                     val game = Game(uuid, grid)
                     games.put(uuid, game)
+                    access.put(uuid, System.currentTimeMillis())
                     call.respond(game)
                 }
                 get("/{id}") {
@@ -67,7 +91,6 @@ fun main() {
                         call.respond(HttpStatusCode.BadRequest, "Game not Found")
                         return@get
                     }
-
                     call.respond(game)
                 }
                 post("/{id}") {
@@ -106,8 +129,8 @@ fun main() {
                     }
                     // Move is valid. Make move and send back AI move
                     game.playerTurn = false
+                    access.put(id, System.currentTimeMillis())
                     pastItem.content = move.type
-                    // TODO check if game is over
                     if (CheckIfWinningMove(game.grid, pastItem)) {
                         game.state = GameState.PlayerWon
                         call.respond(HttpStatusCode.OK)

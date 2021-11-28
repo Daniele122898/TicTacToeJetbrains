@@ -2,6 +2,7 @@ import react.*
 import react.dom.*
 import kotlinx.html.js.*
 import kotlinx.coroutines.*
+import kotlinx.html.classes
 
 private val scope = MainScope()
 
@@ -31,20 +32,40 @@ val tictactoe = fc<Props> {
         }
     }
 
+    if (game.state != GameState.Running) {
+        div("modal") {
+            div("modal_content") {
+                h2("modal_header") {
+                    +getStateString()
+                }
+                div("modal_button") {
+                    +"Restart"
 
-    h1 {
-        +"GameID: ${game.uuid}"
+                    attrs.onClickFunction = {
+                        scope.launch {
+                            setGame(getCreateGame())
+                        }
+                    }
+                }
+            }
+        }
     }
-    h1 {
-        +"State: ${getStateString()}"
+
+    h1("header") {
+        +"Tic Tac Toe"
     }
+
     div("grid") {
         game.grid.forEach { rows ->
             rows.forEach { item ->
                 div("grid_item") {
                     key = "${item.row},${item.col}"
+                    if (item.content == GridType.Cross) {
+                        attrs.classes = attrs.classes.plus("player")
+                    } else if (item.content == GridType.Circle) {
+                        attrs.classes = attrs.classes.plus("ai")
+                    }
                     attrs.onClickFunction = {
-                        console.log("Clicked on ", item)
                         scope.launch {
                             postGameMove(game.uuid, Move(item.row, item.col, GridType.Cross))
                             // TODO separate into GameId and Grid because recreating this object everytime is not necessary
@@ -52,7 +73,9 @@ val tictactoe = fc<Props> {
                             setGame(getGame(game.uuid))
                         }
                     }
-                    +getGridTypeString(item)
+                    span {
+                        +getGridTypeString(item)
+                    }
                 }
             }
         }

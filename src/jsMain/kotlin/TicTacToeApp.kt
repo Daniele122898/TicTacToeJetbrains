@@ -1,9 +1,7 @@
-import csstype.*
 import react.*
 import react.dom.*
 import kotlinx.html.js.*
 import kotlinx.coroutines.*
-import kotlinx.html.style
 
 private val scope = MainScope()
 
@@ -16,11 +14,20 @@ val tictactoe = fc<Props> {
         }
     }
 
-    fun getGridContent(item: GridItem): String {
+    fun getGridTypeString(item: GridItem): String {
         when (item.content) {
-            GridItemContent.Empty -> return ""
-            GridItemContent.Circle -> return "O"
-            GridItemContent.Cross -> return "X"
+            GridType.Empty -> return ""
+            GridType.Circle -> return "O"
+            GridType.Cross -> return "X"
+        }
+    }
+
+    fun getStateString(): String {
+        when(game.state) {
+            GameState.Draw -> return "Draw"
+            GameState.AIWon -> return "AI Won"
+            GameState.PlayerWon -> return "Player Won"
+            GameState.Running -> return "Running"
         }
     }
 
@@ -28,19 +35,25 @@ val tictactoe = fc<Props> {
     h1 {
         +"GameID: ${game.uuid}"
     }
+    h1 {
+        +"State: ${getStateString()}"
+    }
     div("grid") {
-        game.grid.forEach { item ->
-            div("grid_item") {
-                key= item.index.toString()
-                attrs.onClickFunction = {
-                    console.log("Clicked on ", item)
-                    scope.launch {
-                        postGameMove(game.uuid, Move(item.index, GridItemContent.Cross))
-                        // TODO separate into GameId and Grid because recreating this object everytime is not necessary
-                        setGame(Game(game.uuid, getGameGrid(game.uuid)))
+        game.grid.forEach { rows ->
+            rows.forEach { item ->
+                div("grid_item") {
+                    key = "${item.row},${item.col}"
+                    attrs.onClickFunction = {
+                        console.log("Clicked on ", item)
+                        scope.launch {
+                            postGameMove(game.uuid, Move(item.row, item.col, GridType.Cross))
+                            // TODO separate into GameId and Grid because recreating this object everytime is not necessary
+                            // Small move updates would also be great or a history but this is easier for now
+                            setGame(getGame(game.uuid))
+                        }
                     }
+                    +getGridTypeString(item)
                 }
-                +getGridContent(item)
             }
         }
     }

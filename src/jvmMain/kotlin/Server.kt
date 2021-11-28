@@ -15,7 +15,8 @@ import kotlin.collections.HashMap
 val collection = ArrayList<ShoppingListItem>()
 val games = HashMap<String, Game>()
 
-const val gridSize = 10*10;
+const val gridDimension = 10;
+const val winningScore = 5;
 
 fun main() {
     val port = System.getenv("PORT")?.toInt() ?: 8080
@@ -47,10 +48,13 @@ fun main() {
                 // Create Game room
                 get {
                     val uuid = UUID.randomUUID().toString()
-                    val grid = ArrayList<GridItem>(gridSize)
+                    val grid = ArrayList<ArrayList<GridItem>>(gridDimension)
                     // initialize grid
-                    for (i in 1..gridSize) {
-                        grid.add(GridItem(i-1))
+                    for (i in 0..(gridDimension - 1)) {
+                        grid.add(ArrayList<GridItem>(gridDimension))
+                        for (j in 0..(gridDimension - 1)) {
+                            grid[i].add(GridItem(i, j))
+                        }
                     }
                     val game = Game(uuid, grid)
                     games.put(uuid, game)
@@ -59,54 +63,72 @@ fun main() {
                 get("/{id}") {
                     val id = call.parameters["id"] ?: error("Invalid game id")
                     val game = games.get(id);
-                    if (game == null)
-                        error("Game not Found")
+                    if (game == null) {
+                        call.respond(HttpStatusCode.BadRequest, "Game not Found")
+                        return@get
+                    }
 
-                    call.respond(game.grid)
+                    call.respond(game)
                 }
                 post("/{id}") {
                     val id = call.parameters["id"] ?: error("Invalid game id")
                     val move = call.receive<Move>()
-                    if (move.type == GridItemContent.Empty)
-                        error("Cannot make an empty move")
+                    if (move.type == GridType.Empty) {
+                        call.respond(HttpStatusCode.BadRequest, "Cannot make an empty move")
+                        return@post
+                    }
                     // Valid game?
                     val game = games.get(id);
-                    if (game == null)
-                        error("Game not Found")
-
+                    if (game == null) {
+                        call.respond(HttpStatusCode.BadRequest, "Game not Found")
+                        return@post
+                    }
+                    if (game.state != GameState.Running) {
+                        call.respond(HttpStatusCode.BadRequest, "Game already over")
+                        return@post
+                    }
                     // Is player turn?
-                    if (!game.playerTurn)
-                        error("Not your turn!")
-
+                    if (!game.playerTurn) {
+                        call.respond(HttpStatusCode.BadRequest, "Not your turn!")
+                        return@post
+                    }
                     // valid move?
-                    if (move.index < 0 || move.index >= gridSize)
-                        error("Index out of grid bounds")
-                    val pastItem = game.grid[move.index];
-                    if (pastItem.content != GridItemContent.Empty)
-                        error("Cannot make move on a field that is not empty")
+                    if (move.row < 0 || move.row >= gridDimension ||
+                        move.col < 0 || move.col >= gridDimension) {
+                        call.respond(HttpStatusCode.BadRequest, "Index out of grid bounds")
+                        return@post
+                    }
 
+                    val pastItem = game.grid[move.row][move.col];
+                    if (pastItem.content != GridType.Empty) {
+                        call.respond(HttpStatusCode.BadRequest, "Cannot make move on a field that is not empty")
+                        return@post
+                    }
                     // Move is valid. Make move and send back AI move
                     game.playerTurn = false
                     pastItem.content = move.type
+                    // TODO check if game is over
+                    if (CheckIfWinningMove(game.grid, pastItem)) {
+                        game.state = GameState.PlayerWon
+                        call.respond(HttpStatusCode.OK)
+                        return@post
+                    }
+                    val aiMove = AIMakeMove(game.grid, move)
+                    if (aiMove == null) {
+                        // Draw
+                        game.state = GameState.Draw
+                        call.respond(HttpStatusCode.OK)
+                        return@post
+                    }
+                    // AI won
+                    if (aiMove.second >= 100)
+                        game.state = GameState.AIWon
+                    else
+                        game.playerTurn = true
+
                     call.respond(HttpStatusCode.OK)
                 }
             }
-//            route(ShoppingListItem.path) {
-//                get {
-//                    call.respond(collection)
-//                }
-//                post {
-////                    collection.insertOne(call.receive<ShoppingListItem>())
-//                    collection.add(call.receive<ShoppingListItem>())
-//                    call.respond(HttpStatusCode.OK)
-//                }
-//                delete("/{id}") {
-//                    val id = call.parameters["id"]?.toInt() ?: error("Invalid delete request")
-////                    collection.deleteOne(ShoppingListItem::id eq id)
-//                    collection.removeIf(Predicate { t ->  t.id == id})
-//                    call.respond(HttpStatusCode.OK)
-//                }
-//            }
         }
     }.start(wait = true)
 }

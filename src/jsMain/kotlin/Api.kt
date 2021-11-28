@@ -15,7 +15,10 @@ suspend fun getCreateGame(): Game {
     return jsonClient.get(endpoint + GameRoute)
 }
 
-suspend fun getGameGrid(id: String): ArrayList<GridItem> {
+// TODO technically it would be WAAY better to just sent updates on actual moves
+// especially with some form of websocket. But this is waaaay to out of scope
+// and i simply dont have the time :/
+suspend fun getGame(id: String): Game {
     return jsonClient.get(endpoint + GameRoute + "/${id}")
 }
 

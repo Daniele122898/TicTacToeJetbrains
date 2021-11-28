@@ -1,7 +1,7 @@
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class GridItemContent {
+enum class GridType {
     Empty,
     Cross,
     Circle,

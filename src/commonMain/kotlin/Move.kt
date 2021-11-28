@@ -1,4 +1,4 @@
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Move(val index: Int, val type: GridItemContent)
+data class Move(val row: Int, val col: Int, val type: GridType)

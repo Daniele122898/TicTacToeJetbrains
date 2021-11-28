@@ -1,6 +1,6 @@
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GridItem(val index: Int) {
-    var content: GridItemContent = GridItemContent.Empty
+data class GridItem(val row: Int, val col: Int) {
+    var content: GridType = GridType.Empty
 }

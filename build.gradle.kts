@@ -1,6 +1,12 @@
+val kotlinVersion = "1.5.31"
+val serializationVersion = "1.3.0"
+val ktorVersion = "1.5.2"
+val kmongoVersion = "4.3.0"
+
 plugins {
     kotlin("multiplatform") version "1.5.10"
     application
+    kotlin("plugin.serialization") version "1.5.31"
 }
 
 group = "me.danie"
@@ -30,7 +36,11 @@ kotlin {
         }
     }
     sourceSets {
-        val commonMain by getting
+        val commonMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
+            }
+        }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
@@ -38,14 +48,19 @@ kotlin {
         }
         val jvmMain by getting {
             dependencies {
+                implementation("io.ktor:ktor-serialization:1.5.2")
                 implementation("io.ktor:ktor-server-netty:1.5.2")
                 implementation("io.ktor:ktor-html-builder:1.5.2")
                 implementation("org.jetbrains.kotlinx:kotlinx-html-jvm:0.7.2")
+                implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongoVersion")
             }
         }
         val jvmTest by getting
         val jsMain by getting {
             dependencies {
+                implementation("io.ktor:ktor-client-json:1.5.2")
+                implementation("io.ktor:ktor-client-serialization:1.5.2")
+
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react:17.0.2-pre.206-kotlin-1.5.10")
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:17.0.2-pre.206-kotlin-1.5.10")
             }

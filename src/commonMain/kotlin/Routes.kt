@@ -1,0 +1,1 @@
+const val GameRoute = "/tictactoe"

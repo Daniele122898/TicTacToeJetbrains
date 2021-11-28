@@ -1,0 +1,18 @@
+html, body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.grid {
+    width: 800px;
+    height: 800px;
+    margin: auto;
+    display: grid;
+    grid-template: repeat(10, 1fr) / repeat(10, 1fr);
+    gap: 0.5rem;
+}
+
+.grid_item {
+    background: cyan;
+}

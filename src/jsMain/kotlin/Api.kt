@@ -11,6 +11,6 @@ val jsonClient = HttpClient {
     install(JsonFeature) { serializer = KotlinxSerializer() }
 }
 
-suspend fun getCreateGame(): String {
+suspend fun getCreateGame(): Game {
     return jsonClient.get(endpoint + GameRoute)
 }

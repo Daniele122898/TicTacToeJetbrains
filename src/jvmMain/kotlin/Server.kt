@@ -16,6 +16,8 @@ import kotlin.collections.HashMap
 val collection = ArrayList<ShoppingListItem>()
 val games = HashMap<String, ArrayList<GridItem>>()
 
+const val gridSize = 10*10;
+
 fun main() {
     val port = System.getenv("PORT")?.toInt() ?: 8080
     embeddedServer(Netty, port) {
@@ -46,27 +48,31 @@ fun main() {
                 // Create Game room
                 get {
                     val uuid = UUID.randomUUID().toString()
-                    val grid = ArrayList<GridItem>(10*10)
+                    val grid = ArrayList<GridItem>(gridSize)
+                    // initialize grid
+                    for (i in 1..gridSize) {
+                        grid.add(GridItem(i-1))
+                    }
                     games.put(uuid, grid)
-                    call.respond(uuid)
+                    call.respond(Game(uuid, grid))
                 }
             }
-            route(ShoppingListItem.path) {
-                get {
-                    call.respond(collection)
-                }
-                post {
-//                    collection.insertOne(call.receive<ShoppingListItem>())
-                    collection.add(call.receive<ShoppingListItem>())
-                    call.respond(HttpStatusCode.OK)
-                }
-                delete("/{id}") {
-                    val id = call.parameters["id"]?.toInt() ?: error("Invalid delete request")
-//                    collection.deleteOne(ShoppingListItem::id eq id)
-                    collection.removeIf(Predicate { t ->  t.id == id})
-                    call.respond(HttpStatusCode.OK)
-                }
-            }
+//            route(ShoppingListItem.path) {
+//                get {
+//                    call.respond(collection)
+//                }
+//                post {
+////                    collection.insertOne(call.receive<ShoppingListItem>())
+//                    collection.add(call.receive<ShoppingListItem>())
+//                    call.respond(HttpStatusCode.OK)
+//                }
+//                delete("/{id}") {
+//                    val id = call.parameters["id"]?.toInt() ?: error("Invalid delete request")
+////                    collection.deleteOne(ShoppingListItem::id eq id)
+//                    collection.removeIf(Predicate { t ->  t.id == id})
+//                    call.respond(HttpStatusCode.OK)
+//                }
+//            }
         }
     }.start(wait = true)
 }

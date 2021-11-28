@@ -26,6 +26,9 @@ kotlin {
     }
     js {
         browser {
+            commonWebpackConfig {
+                cssSupport.enabled = true
+            }
             binaries.executable()
         }
     }

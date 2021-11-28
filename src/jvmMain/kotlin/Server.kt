@@ -121,7 +121,7 @@ fun main() {
                         return@post
                     }
                     // AI won
-                    if (aiMove.second >= 100)
+                    if (CheckIfWinningMove(game.grid, game.grid[aiMove.row][aiMove.col]))
                         game.state = GameState.AIWon
                     else
                         game.playerTurn = true

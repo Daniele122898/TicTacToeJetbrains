@@ -1,7 +1,7 @@
 import kotlin.math.max
 import kotlin.math.min
 
-fun AIMakeMove(grid: ArrayList<ArrayList<GridItem>>, playerMove: Move): Pair<Move, Int>? {
+fun AIMakeMove(grid: ArrayList<ArrayList<GridItem>>, playerMove: Move): Move? {
     val empty = ArrayList<GridItem>()
     grid.forEach { row ->
         row.forEach { item ->
@@ -19,24 +19,21 @@ fun AIMakeMove(grid: ArrayList<ArrayList<GridItem>>, playerMove: Move): Pair<Mov
 
     val move = ranked[0].first
     grid[move.row][move.col].content = GridType.Circle
-    return Pair(Move(move.row, move.col, GridType.Circle), ranked[0].second)
-
-//    var visited = ArrayList<ArrayList<Boolean>>(gridDimension)
-//    for ((i, row) in grid.withIndex()) {
-//        visited.add(ArrayList<Boolean>(gridDimension))
-//        for ((j, item) in row.withIndex()) {
-//            if (visited[i][j])
-//                continue
-//            visited[i][j]
-//            // walk to the right
-//            // walk down
-//            // walk both diagonals
-//        }
-//    }
+    return Move(move.row, move.col, GridType.Circle)
 }
 
 fun CheckIfWinningMove(grid: ArrayList<ArrayList<GridItem>>, move: GridItem): Boolean {
-    return GetMoveScore(grid, move, null) >= 100
+    var score = 0
+    // Check horizontal
+    score = max(score, CountHorizontal(grid, move, move.content))
+    // Check Vertical
+    score = max(score, CountVertical(grid, move, move.content))
+    // Check Diagonal
+    score = max(score, CountDiagRight(grid, move, move.content))
+    score = max(score, CountDiagLeft(grid, move, move.content))
+
+
+    return score >= 100
 }
 
 fun GetMoveScore(grid: ArrayList<ArrayList<GridItem>>, item: GridItem, playerMove: Move?): Int {
@@ -109,6 +106,12 @@ fun CountDiagRight(grid: ArrayList<ArrayList<GridItem>>, item: GridItem, type: G
         ++i
     }
 
+    // Make sure we dont block ourselfs
+    // This is pretty horrible but i just dont have the time to fix it rn...
+    val dis = min(item.row, min(gridDimension-item.row, min(item.col, gridDimension-item.col)))+1
+    if (dis < winningScore - score && type == GridType.Circle)
+        return 0
+
     // If this move could immediately win / loose, we need to prioritize!
     if (score == winningScore - 1)
         return 100
@@ -141,6 +144,11 @@ fun CountDiagLeft(grid: ArrayList<ArrayList<GridItem>>, item: GridItem, type: Gr
         ++score
         ++i
     }
+
+    // This is pretty horrible but i just dont have the time to fix it rn...
+    val dis = min(item.row, min(gridDimension-item.row, min(item.col, gridDimension-item.col)))+1
+    if (dis < winningScore - score && type == GridType.Circle)
+        return 0
 
     // If this move could immediately win / loose, we need to prioritize!
     if (score == winningScore - 1)

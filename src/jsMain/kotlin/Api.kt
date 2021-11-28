@@ -14,3 +14,14 @@ val jsonClient = HttpClient {
 suspend fun getCreateGame(): Game {
     return jsonClient.get(endpoint + GameRoute)
 }
+
+suspend fun getGameGrid(id: String): ArrayList<GridItem> {
+    return jsonClient.get(endpoint + GameRoute + "/${id}")
+}
+
+suspend fun postGameMove(id: String, move: Move) {
+    jsonClient.post<Unit>(endpoint + GameRoute + "/${id}") {
+        contentType(ContentType.Application.Json)
+        body = move
+    }
+}

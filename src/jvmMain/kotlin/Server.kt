@@ -9,12 +9,11 @@ import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import java.util.*
-import java.util.function.Predicate
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 val collection = ArrayList<ShoppingListItem>()
-val games = HashMap<String, ArrayList<GridItem>>()
+val games = HashMap<String, Game>()
 
 const val gridSize = 10*10;
 
@@ -53,8 +52,43 @@ fun main() {
                     for (i in 1..gridSize) {
                         grid.add(GridItem(i-1))
                     }
-                    games.put(uuid, grid)
-                    call.respond(Game(uuid, grid))
+                    val game = Game(uuid, grid)
+                    games.put(uuid, game)
+                    call.respond(game)
+                }
+                get("/{id}") {
+                    val id = call.parameters["id"] ?: error("Invalid game id")
+                    val game = games.get(id);
+                    if (game == null)
+                        error("Game not Found")
+
+                    call.respond(game.grid)
+                }
+                post("/{id}") {
+                    val id = call.parameters["id"] ?: error("Invalid game id")
+                    val move = call.receive<Move>()
+                    if (move.type == GridItemContent.Empty)
+                        error("Cannot make an empty move")
+                    // Valid game?
+                    val game = games.get(id);
+                    if (game == null)
+                        error("Game not Found")
+
+                    // Is player turn?
+                    if (!game.playerTurn)
+                        error("Not your turn!")
+
+                    // valid move?
+                    if (move.index < 0 || move.index >= gridSize)
+                        error("Index out of grid bounds")
+                    val pastItem = game.grid[move.index];
+                    if (pastItem.content != GridItemContent.Empty)
+                        error("Cannot make move on a field that is not empty")
+
+                    // Move is valid. Make move and send back AI move
+                    game.playerTurn = false
+                    pastItem.content = move.type
+                    call.respond(HttpStatusCode.OK)
                 }
             }
 //            route(ShoppingListItem.path) {

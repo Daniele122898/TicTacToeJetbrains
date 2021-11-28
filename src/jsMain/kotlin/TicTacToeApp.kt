@@ -34,6 +34,11 @@ val tictactoe = fc<Props> {
                 key= item.index.toString()
                 attrs.onClickFunction = {
                     console.log("Clicked on ", item)
+                    scope.launch {
+                        postGameMove(game.uuid, Move(item.index, GridItemContent.Cross))
+                        // TODO separate into GameId and Grid because recreating this object everytime is not necessary
+                        setGame(Game(game.uuid, getGameGrid(game.uuid)))
+                    }
                 }
                 +getGridContent(item)
             }
